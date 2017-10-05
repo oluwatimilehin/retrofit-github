@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Retrofit Github</string>
+    <string name="fill_your_credentials_here">Fill your credentials here</string>
+    <string name="password">Password:</string>
+    <string name="username">Username:</string>
 </resources>
