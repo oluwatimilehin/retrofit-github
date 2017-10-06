@@ -24,7 +24,7 @@ public class CredentialDialog extends DialogFragment {
 
     @BindView(R.id.nameEditText)
     EditText usernameField;
-    @BindView(R.id.passwordTv)
+    @BindView(R.id.passwordEditText)
     EditText passwordField;
     CredentialsDialogListener listener;
 
