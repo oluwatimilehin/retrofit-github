@@ -38,6 +38,9 @@ public class CredentialDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_credentials, null);
         ButterKnife.bind(this, view);
 
+        usernameField.setText(getArguments().getString("username"));
+        passwordField.setText(getArguments().getString("password"));
+
         builder.setView(view)
                 .setTitle("Credentials")
                 .setNegativeButton("Cancel", null)
