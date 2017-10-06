@@ -9,6 +9,10 @@ public class GithubRepo {
 
     String name;
     String url;
-
     String owner;
+
+    @Override
+    public String toString() {
+        return(name + " " +  url);
+    }
 }
