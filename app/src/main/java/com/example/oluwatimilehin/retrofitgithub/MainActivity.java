@@ -191,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                         .R.layout.simple_spinner_dropdown_item, issues);
                 issuesSpinner.setEnabled(true);
                 commentField.setEnabled(true);
+                postCommentButton.setEnabled(true);
                 issuesSpinner.setAdapter(issuesArrayAdapter);
             } else {
                 showEmptyIssuesAdapterState();
@@ -221,6 +222,8 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                 .simple_spinner_dropdown_item, new String[]{"No " +
                 "data"});
         issuesSpinner.setAdapter(adapter);
+        commentField.setEnabled(false);
+        postCommentButton.setEnabled(false);
         issuesSpinner.setEnabled(false);
     }
 
