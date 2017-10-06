@@ -7,6 +7,18 @@ package com.example.oluwatimilehin.retrofitgithub.models;
 
 public class GithubRepo {
 
+    public String getName() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
     String name;
     String url;
     String owner;
