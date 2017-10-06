@@ -7,4 +7,5 @@
     <string name="comment_hint">Your Comment</string>
     <string name="loadRepos">Load Repositories</string>
     <string name="post_comment">Post Comment </string>
+    <string name="set_credentials">Set your credentials</string>
 </resources>
