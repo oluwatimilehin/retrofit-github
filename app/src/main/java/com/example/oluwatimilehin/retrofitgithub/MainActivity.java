@@ -64,20 +64,8 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        issuesSpinner.setEnabled(false);
-
         showEmptyRepoAdapterState();
-        reposSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        showEmptyIssuesAdapterState();
 
         reposSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -88,18 +76,8 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                             .getName())
                             .observeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe((List<GithubIssue> issues) -> {
-                                if (!issues.isEmpty()) {
-                                    ArrayAdapter<GithubIssue> issuesArrayAdapter = new
-                                            ArrayAdapter<GithubIssue>(MainActivity.this, android
-                                            .R.layout.simple_spinner_dropdown_item, issues);
-                                    issuesSpinner.setEnabled(true);
-                                    commentField.setEnabled(true);
-                                    issuesSpinner.setAdapter(issuesArrayAdapter);
-                                } else {
-
-                                }
-                            }));
+                            .subscribe( issuesSuccessResponse() ,
+                                         errorResponse()));
 
                 }
             }
@@ -185,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 reposSuccessResponse(),
-                                reposErrorResponse()
+                                errorResponse()
                         ));
                 break;
         }
@@ -205,10 +183,25 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
         };
     }
 
-    private Consumer<Throwable> reposErrorResponse() {
+    private Consumer<List<GithubIssue>> issuesSuccessResponse(){
+        return (List<GithubIssue> issues) -> {
+            if (!issues.isEmpty()) {
+                ArrayAdapter<GithubIssue> issuesArrayAdapter = new
+                        ArrayAdapter<GithubIssue>(MainActivity.this, android
+                        .R.layout.simple_spinner_dropdown_item, issues);
+                issuesSpinner.setEnabled(true);
+                commentField.setEnabled(true);
+                issuesSpinner.setAdapter(issuesArrayAdapter);
+            } else {
+                showEmptyIssuesAdapterState();
+            }
+        };
+    }
+
+    private Consumer<Throwable> errorResponse() {
         return (Throwable e) -> {
             e.printStackTrace();
-            Toast.makeText(this, "Cannot load repositories", Toast
+            Toast.makeText(this, "Cannot load data", Toast
                     .LENGTH_SHORT).show();
         };
     }
@@ -220,6 +213,15 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                 "data"});
         reposSpinner.setAdapter(adapter);
         reposSpinner.setEnabled(false);
+    }
+
+    private void showEmptyIssuesAdapterState() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                MainActivity.this, android.R.layout
+                .simple_spinner_dropdown_item, new String[]{"No " +
+                "data"});
+        issuesSpinner.setAdapter(adapter);
+        issuesSpinner.setEnabled(false);
     }
 
     @Override
