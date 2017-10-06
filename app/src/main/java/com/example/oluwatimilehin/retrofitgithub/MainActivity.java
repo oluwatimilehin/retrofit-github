@@ -6,12 +6,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.oluwatimilehin.retrofitgithub.models.CredentialDialog;
+import com.example.oluwatimilehin.retrofitgithub.models.GithubIssue;
 import com.example.oluwatimilehin.retrofitgithub.models.GithubRepo;
 import com.example.oluwatimilehin.retrofitgithub.models.GithubRepoDeserializer;
 import com.google.gson.Gson;
@@ -23,7 +26,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
@@ -61,8 +64,51 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        reposSpinner.setEnabled(false);
         issuesSpinner.setEnabled(false);
+
+        showEmptyRepoAdapterState();
+        reposSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        reposSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (parent.getItemAtPosition(position) instanceof GithubRepo) {
+                    GithubRepo repo = (GithubRepo) parent.getItemAtPosition(position);
+                    compositeDisposables.add(githubService.getIssues(repo.getOwner(), repo
+                            .getName())
+                            .observeOn(Schedulers.io())
+                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .subscribe((List<GithubIssue> issues) -> {
+                                if (!issues.isEmpty()) {
+                                    ArrayAdapter<GithubIssue> issuesArrayAdapter = new
+                                            ArrayAdapter<GithubIssue>(MainActivity.this, android
+                                            .R.layout.simple_spinner_dropdown_item, issues);
+                                    issuesSpinner.setEnabled(true);
+                                    commentField.setEnabled(true);
+                                    issuesSpinner.setAdapter(issuesArrayAdapter);
+                                } else {
+
+                                }
+                            }));
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         createGithubApi();
     }
@@ -138,41 +184,42 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                (List<GithubRepo> value) -> {
-                                    if (!value.isEmpty()) {
-                                        ArrayAdapter<GithubRepo> adapter = new ArrayAdapter<GithubRepo>
-                                                (MainActivity.this,
-                                                        android.R.layout.simple_spinner_dropdown_item, value);
-                                        reposSpinner.setAdapter(adapter);
-                                        reposSpinner.setEnabled(true);
-                                    } else {
-                                        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                                                MainActivity.this, android.R.layout
-                                                .simple_spinner_dropdown_item, new String[]{"No " +
-                                                "data"});
-                                        reposSpinner.setAdapter(adapter);
-                                        reposSpinner.setEnabled(false);
-                                    }
-                                },
-                                (Throwable e) -> e.printStackTrace()));
+                                reposSuccessResponse(),
+                                reposErrorResponse()
+                        ));
                 break;
         }
     }
 
-    private DisposableSingleObserver<List<GithubRepo>> getReposObserver() {
-
-
-        return new DisposableSingleObserver<List<GithubRepo>>() {
-            @Override
-            public void onSuccess(List<GithubRepo> value) {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
+    private Consumer<List<GithubRepo>> reposSuccessResponse() {
+        return (List<GithubRepo> value) -> {
+            if (!value.isEmpty()) {
+                ArrayAdapter<GithubRepo> adapter = new ArrayAdapter<GithubRepo>
+                        (MainActivity.this,
+                                android.R.layout.simple_spinner_dropdown_item, value);
+                reposSpinner.setAdapter(adapter);
+                reposSpinner.setEnabled(true);
+            } else {
+                showEmptyRepoAdapterState();
             }
         };
+    }
+
+    private Consumer<Throwable> reposErrorResponse() {
+        return (Throwable e) -> {
+            e.printStackTrace();
+            Toast.makeText(this, "Cannot load repositories", Toast
+                    .LENGTH_SHORT).show();
+        };
+    }
+
+    private void showEmptyRepoAdapterState() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                MainActivity.this, android.R.layout
+                .simple_spinner_dropdown_item, new String[]{"No " +
+                "data"});
+        reposSpinner.setAdapter(adapter);
+        reposSpinner.setEnabled(false);
     }
 
     @Override
