@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.oluwatimilehin.retrofitgithub.models.CredentialDialog;
 import com.example.oluwatimilehin.retrofitgithub.models.GithubIssue;
@@ -31,6 +32,7 @@ import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -76,8 +78,8 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                             .getName())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeOn(Schedulers.io())
-                            .subscribe( issuesSuccessResponse() ,
-                                         errorResponse()));
+                            .subscribe(issuesSuccessResponse(),
+                                    errorResponse()));
 
                 }
             }
@@ -167,7 +169,29 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                                 errorResponse()
                         ));
                 break;
+            case R.id.postCommentButton:
+                String comment = commentField.getText().toString();
+
+                if (!comment.isEmpty()) {
+                    GithubIssue issue = (GithubIssue) issuesSpinner.getSelectedItem();
+                    issue.setComment(comment);
+
+                    compositeDisposables.add(githubService.postComment(issue.getCommentsUrl(), issue)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(postCommentSuccess(), errorResponse()));
+
+                } else {
+                    Toast.makeText(this, "Please enter a comment", Toast.LENGTH_SHORT).show();
+                }
         }
+    }
+
+    private Consumer<ResponseBody> postCommentSuccess() {
+        return value -> {
+            commentField.setText("");
+            Toast.makeText(this, "Comment created", Toast.LENGTH_SHORT).show();
+        };
     }
 
     private Consumer<List<GithubRepo>> reposSuccessResponse() {
@@ -184,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
         };
     }
 
-    private Consumer<List<GithubIssue>> issuesSuccessResponse(){
+    private Consumer<List<GithubIssue>> issuesSuccessResponse() {
         return (List<GithubIssue> issues) -> {
             if (!issues.isEmpty()) {
                 ArrayAdapter<GithubIssue> issuesArrayAdapter = new
@@ -203,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
     private Consumer<Throwable> errorResponse() {
         return (Throwable e) -> {
             e.printStackTrace();
+            Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT).show();
         };
     }
 

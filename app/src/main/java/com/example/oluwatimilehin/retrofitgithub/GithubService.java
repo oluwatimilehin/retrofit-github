@@ -6,7 +6,7 @@ import com.example.oluwatimilehin.retrofitgithub.models.GithubRepo;
 import java.util.List;
 
 import io.reactivex.Single;
-import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -27,5 +27,5 @@ public interface GithubService {
     Single<List<GithubIssue>> getIssues(@Path("owner") String owner, @Path("repo") String repo);
 
     @POST()
-    Single<RequestBody> postComment(@Url String url, @Body GithubIssue issue);
+    Single<ResponseBody> postComment(@Url String url, @Body GithubIssue issue);
 }
