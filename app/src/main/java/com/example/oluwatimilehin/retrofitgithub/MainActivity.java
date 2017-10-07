@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.oluwatimilehin.retrofitgithub.models.CredentialDialog;
 import com.example.oluwatimilehin.retrofitgithub.models.GithubIssue;
@@ -75,8 +74,8 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
                     GithubRepo repo = (GithubRepo) parent.getItemAtPosition(position);
                     compositeDisposables.add(githubService.getIssues(repo.getOwner(), repo
                             .getName())
-                            .observeOn(Schedulers.io())
-                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.io())
                             .subscribe( issuesSuccessResponse() ,
                                          errorResponse()));
 
@@ -204,8 +203,6 @@ public class MainActivity extends AppCompatActivity implements CredentialDialog.
     private Consumer<Throwable> errorResponse() {
         return (Throwable e) -> {
             e.printStackTrace();
-            Toast.makeText(this, "Cannot load data", Toast
-                    .LENGTH_SHORT).show();
         };
     }
 
