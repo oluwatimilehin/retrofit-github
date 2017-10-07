@@ -8,6 +8,21 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class GithubIssue {
+    public String getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getCommentsUrl() {
+        return commentsUrl;
+    }
+
+    public String getComment() {
+        return comment;
+    }
 
     String id;
     String title;
