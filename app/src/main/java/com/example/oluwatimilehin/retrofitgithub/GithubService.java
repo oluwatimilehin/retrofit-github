@@ -20,7 +20,7 @@ import retrofit2.http.Url;
 
 public interface GithubService {
 
-    @GET("/user/repos")
+    @GET("/user/repos?type=owner")
     Single<List<GithubRepo>> getRepos();
 
     @GET("/repos/{owner}/{repo}/issues")
